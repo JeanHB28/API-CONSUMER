@@ -1,10 +1,9 @@
-﻿namespace ProyectoBibliotecaAPI.Models
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+namespace ProyectoBibliotecaAPI.Models
 {
-    using System;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-
-    public class Recomendacion
+     public class Recomendacion
     {
         [Key]
         public int ID { get; set; }
