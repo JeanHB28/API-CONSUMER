@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using ProyectoBibliotecaAPI.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -9,20 +11,21 @@ using System.Text;
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _config;
+    private readonly AppDbContext _context;
 
-    public AuthController(IConfiguration config)
+    public AuthController(IConfiguration config, AppDbContext context)
     {
         _config = config;
+        _context = context;
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] UserLogin userLogin)
+    public async Task<IActionResult> Login([FromBody] UserLogin userLogin)
     {
-        if (userLogin.Username == "admin" && userLogin.Password == "1234")        {
-            var token = GenerateJwtToken(userLogin.Username);
-            return Ok(new { token });
-        }
-        return Unauthorized();
+        var usuario = await _context.Usuario.FirstOrDefaultAsync(u => u.Email == userLogin.Username);
+           
+        var token = GenerateJwtToken(usuario.Email);
+        return Ok(new { token });
     }
 
     private string GenerateJwtToken(string username)
@@ -30,7 +33,7 @@ public class AuthController : ControllerBase
         var key = Encoding.UTF8.GetBytes("SuperClaveSecreta1234");
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(new Claim[]
+            Subject = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Name, username)
             }),
@@ -44,7 +47,7 @@ public class AuthController : ControllerBase
     }
 }
 
-// Modelo para recibir credenciales
+
 public class UserLogin
 {
     public string Username { get; set; }
